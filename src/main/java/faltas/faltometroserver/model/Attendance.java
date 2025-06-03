@@ -1,11 +1,6 @@
 package faltas.faltometroserver.model;
 
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.Size;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,14 +11,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Course {
-
+public class Attendance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Size(max = 50)
-    private String name;
+    private Boolean present;
 
+    @ManyToOne
+    @JoinColumn(name = "student_id")
+    private Student student;
 
+    @ManyToOne
+    @JoinColumn(name = "lecture_id")
+    private Lecture lecture;
 }

@@ -1,6 +1,7 @@
 package faltas.faltometroserver.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,8 +20,10 @@ public class Subject {
     @GeneratedValue
     private Long id;
 
+    @Size(max = 50)
     private String name;
 
+    @Size(max = 6)
     private String code;
 
     private int limitAbsences;
