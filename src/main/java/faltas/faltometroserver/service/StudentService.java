@@ -1,5 +1,7 @@
 package faltas.faltometroserver.service;
 
+import faltas.faltometroserver.converter.StudentConverter;
+import faltas.faltometroserver.dto.StudentDTO;
 import faltas.faltometroserver.model.Student;
 import faltas.faltometroserver.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,38 +14,44 @@ import java.util.Optional;
 public class StudentService {
 
     private final StudentRepository studentRepository;
+    private final StudentConverter studentConverter;
 
     @Autowired
-    public StudentService(StudentRepository studentRepository) {
+    public StudentService(StudentRepository studentRepository, StudentConverter studentConverter) {
         this.studentRepository = studentRepository;
+        this.studentConverter = studentConverter;
     }
 
-    public Student createStudent(Student student) {
+
+    public Student createStudent(StudentDTO studentDTO) {
+        Student student = studentConverter.toEntity(studentDTO);
         return studentRepository.save(student);
     }
 
-    public List<Student> getAllStudents() {
-        return studentRepository.findAll();
+    public List<StudentDTO> getAllStudents() {
+        return studentConverter.toDto(studentRepository.findAll());
     }
 
-    public Optional<Student> getStudentById(Integer id) {
-        return studentRepository.findById(id);
-    }
-
-    public Student updateStudent(Integer id, Student updatedStudent) {
+    public Optional<StudentDTO> getStudentById(Long id) {
         return studentRepository.findById(id)
-                .map(student -> {
-                    student.setName(updatedStudent.getName());
-                    student.setEmail(updatedStudent.getEmail());
-                    student.setPassword(updatedStudent.getPassword());
-                    student.setCourse(updatedStudent.getCourse());
-                    return studentRepository.save(student);
-                })
-                .orElseThrow(() -> new IllegalArgumentException("Student not found with ID: " + id));
+                .map(studentConverter::toDto);
     }
 
-    // Delete a student by ID
-    public void deleteStudent(Integer id) {
-        studentRepository.deleteById(id);
+    public StudentDTO updateStudent(Long id, StudentDTO studentDTO) {
+        Optional<Student> optionalStudent = studentRepository.findById(id);
+        if (optionalStudent.isPresent()) {
+            Student student = optionalStudent.get();
+            if (studentDTO.getName() != null) {
+                student.setName(studentDTO.getName());
+            }
+            if (studentDTO.getEmail() != null) {
+                student.setEmail(studentDTO.getEmail());
+            }
+            Student updatedStudent = studentRepository.save(student);
+            return studentConverter.toDto(updatedStudent);
+        } else {
+            throw new IllegalArgumentException("Student with ID " + id + " not found.");
+        }
     }
+
 }
